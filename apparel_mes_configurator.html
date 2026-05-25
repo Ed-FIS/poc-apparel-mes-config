@@ -77,6 +77,10 @@
                     <i data-lucide="line-chart" class="w-4 h-4 mr-3 text-slate-400 group-hover:text-white"></i>
                     <span>Floor Dashboard</span>
                 </button>
+                <button onclick="switchTab('floor-map')" id="btn-floor-map" class="nav-btn flex items-center w-full px-3 py-2.5 text-sm font-semibold rounded-lg transition-all duration-150 group">
+                    <i data-lucide="map" class="w-4 h-4 mr-3 text-slate-400 group-hover:text-white"></i>
+                    <span>Floor Layout Map</span>
+                </button>
                 <button onclick="switchTab('simulator')" id="btn-simulator" class="nav-btn flex items-center w-full px-3 py-2.5 text-sm font-semibold rounded-lg transition-all duration-150 group">
                     <i data-lucide="tablet" class="w-4 h-4 mr-3 text-slate-400 group-hover:text-white"></i>
                     <span>Tablet Simulator</span>
@@ -189,12 +193,12 @@
                             <p class="text-xs text-slate-500">Live hierarchical relationship mapping: Group ➔ Line ➔ Station (Machine/Specs)</p>
                         </div>
                         <div class="flex items-center space-x-3">
+                            <button onclick="switchTab('floor-map')" class="inline-flex items-center text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-200 transition">
+                                <i data-lucide="map" class="w-3.5 h-3.5 mr-1.5"></i> Launch Floor Layout Visualizer
+                            </button>
                             <button onclick="switchTab('architecture')" class="inline-flex items-center text-xs font-bold text-brand-600 hover:text-brand-800 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-lg border border-brand-200 transition">
                                 <i data-lucide="git-fork" class="w-3.5 h-3.5 mr-1.5"></i> View Database & ERD Model
                             </button>
-                            <span class="inline-flex items-center text-[10px] font-bold px-2.5 py-1 rounded bg-amber-50 text-amber-700 border border-amber-200">
-                                <i data-lucide="info" class="w-3.5 h-3.5 mr-1"></i> Interactive Tree
-                            </span>
                         </div>
                     </div>
                     
@@ -257,6 +261,44 @@
                         <div class="flex-1 overflow-y-auto space-y-2.5 pr-2 no-scrollbar" id="dashboard-log-list">
                             <!-- Injected Dynamic logs -->
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB CONTAINER: FLOOR MAP LAYOUT VISUALIZER -->
+            <section id="view-floor-map" class="tab-view hidden space-y-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-100 pb-4 mb-6 gap-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900">Physical Factory Floor Layout Map</h2>
+                            <p class="text-xs text-slate-500">Visual mapping of active line loops, workstations flow structures, and real-time machine telemetry</p>
+                        </div>
+                        
+                        <!-- Map Legend -->
+                        <div class="flex flex-wrap items-center gap-4 text-xs font-semibold bg-slate-50 border border-slate-100 p-3 rounded-xl">
+                            <span class="text-slate-400 block text-[10px] uppercase font-bold tracking-wider w-full mb-1">Floor Map Legend</span>
+                            <div class="flex items-center space-x-1.5">
+                                <span class="w-3 h-3 rounded bg-indigo-500/10 border border-indigo-400 block"></span>
+                                <span class="text-slate-600">Traditional Row</span>
+                            </div>
+                            <div class="flex items-center space-x-1.5">
+                                <span class="w-3 h-3 rounded bg-emerald-500/10 border border-emerald-400 block"></span>
+                                <span class="text-slate-600">Modular Cell</span>
+                            </div>
+                            <div class="flex items-center space-x-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse block"></span>
+                                <span class="text-slate-600">Active telemetry</span>
+                            </div>
+                            <div class="flex items-center space-x-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-red-500 block"></span>
+                                <span class="text-slate-600">Maintenance issue</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Layout Grid container -->
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6" id="floor-map-grid">
+                        <!-- Floor Map divisions and structures are dynamically injected here -->
                     </div>
                 </div>
             </section>
@@ -982,6 +1024,9 @@
             // Re-render dashboard stats and tree maps globally
             renderDashboardStats();
             renderBlueprintTree();
+            if (appState.currentTab === 'floor-map') {
+                renderFloorMap();
+            }
         }
 
         // Factory Reset Strategy
@@ -1032,6 +1077,9 @@
                     renderDashboardStats();
                     renderBlueprintTree();
                     break;
+                case 'floor-map':
+                    renderFloorMap();
+                    break;
                 case 'groups':
                     renderLineGroups();
                     break;
@@ -1048,7 +1096,7 @@
                     renderSimulatorView();
                     break;
                 case 'architecture':
-                    // Setup SVG is rendered, static and fluid
+                    // Setup SVG is rendered inside the view container
                     break;
             }
         }
@@ -1226,6 +1274,156 @@
                 groupHtml += `</div>`;
                 groupCard.innerHTML = groupHtml;
                 container.appendChild(groupCard);
+            });
+            lucide.createIcons();
+        }
+
+        // --- RENDER COMPONENT: FACTORY FLOOR MAP LAYOUT ---
+        function renderFloorMap() {
+            const container = document.getElementById('floor-map-grid');
+            container.innerHTML = '';
+
+            if (appState.lineGroups.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-slate-400 text-xs space-y-2 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                        <i data-lucide="map" class="w-10 h-10 mx-auto opacity-35"></i>
+                        <p>No Factory Divisions established yet to map layout. Click "Line Groups" to configure.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            appState.lineGroups.forEach(group => {
+                const groupLines = appState.lines.filter(line => line.groupId === group.id);
+                
+                const groupDiv = document.createElement('div');
+                groupDiv.className = "border border-slate-200 bg-slate-50/50 rounded-2xl p-5 space-y-4 hover:shadow-md transition duration-200";
+                
+                let groupHtml = `
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-brand-600"></i>
+                            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">${group.name}</h3>
+                        </div>
+                        <span class="text-[9px] bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full">${group.location}</span>
+                    </div>
+                    
+                    <div class="space-y-4">
+                `;
+
+                if (groupLines.length === 0) {
+                    groupHtml += `
+                        <div class="text-center py-6 bg-white border border-dashed border-slate-200 rounded-xl text-xs text-slate-400">
+                            No active lines routed in this department.
+                        </div>
+                    `;
+                } else {
+                    groupLines.forEach(line => {
+                        const lineStations = appState.stations.filter(st => st.lineId === line.id);
+                        const isModular = line.layoutType === 'modular';
+                        const layoutBg = isModular ? 'bg-emerald-50/30' : 'bg-indigo-50/30';
+                        const badgeColor = isModular ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-100 text-indigo-800';
+
+                        groupHtml += `
+                            <div class="bg-white border border-slate-200/60 rounded-xl p-4 space-y-3 shadow-sm">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h4 class="text-xs font-extrabold text-slate-800">${line.name}</h4>
+                                        <p class="text-[9px] text-slate-400 font-medium">Standard baseline target: ${line.targetEfficiency}% SAM</p>
+                                    </div>
+                                    <span class="text-[9px] uppercase font-black px-2 py-0.5 rounded-full ${badgeColor}">${line.layoutType}</span>
+                                </div>
+                        `;
+
+                        if (lineStations.length === 0) {
+                            groupHtml += `
+                                <div class="text-center py-3 bg-slate-50 rounded-lg border border-dashed border-slate-200 text-[10px] text-slate-400">
+                                    No workstations mapped to this active path.
+                                </div>
+                            `;
+                        } else {
+                            if (isModular) {
+                                // Modular loop layout (U-Shape Cell schematic)
+                                groupHtml += `
+                                    <div class="p-3 bg-emerald-50/20 border border-emerald-100/50 rounded-xl flex flex-col items-center">
+                                        <span class="text-[8px] uppercase tracking-wider font-extrabold text-slate-400 mb-3 block">Cell Operator Movement Path</span>
+                                        <div class="flex flex-wrap items-center justify-center gap-2 max-w-sm w-full py-1">
+                                `;
+
+                                lineStations.forEach(st => {
+                                    const mach = appState.machines.find(m => m.id === st.assignedMachineId);
+                                    const machTag = mach ? mach.assetTag : 'None';
+                                    const isMaint = mach && mach.status === 'Maintenance';
+                                    
+                                    // Live telemetry check: active log in the last 15 minutes
+                                    const lastActiveLog = appState.productionLogs.some(log => log.stationCode === st.code && (Date.now() - new Date(log.timestamp).getTime()) < 900000);
+                                    const pulseStyle = lastActiveLog ? 'border-emerald-500 bg-emerald-50/50 shadow-sm' : 'border-slate-200 bg-slate-50';
+
+                                    groupHtml += `
+                                        <div class="relative flex flex-col items-center justify-center p-2 rounded-xl border w-20 text-center transition ${pulseStyle}">
+                                            ${lastActiveLog ? '<span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white animate-pulse"></span>' : ''}
+                                            ${isMaint ? '<span class="absolute -top-1 -left-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>' : ''}
+                                            <span class="text-[9px] font-black text-slate-900">${st.code}</span>
+                                            <span class="text-[8px] text-slate-400 mt-0.5 font-bold truncate w-full">${machTag}</span>
+                                            <span class="text-[7px] text-slate-500 bg-white border px-1 rounded mt-1 font-semibold">${st.tabletStrategy}</span>
+                                        </div>
+                                    `;
+                                });
+
+                                groupHtml += `
+                                        </div>
+                                    </div>
+                                `;
+                            } else {
+                                // Traditional assembly line layout (Straight sequence map)
+                                groupHtml += `
+                                    <div class="p-3 bg-indigo-50/20 border border-indigo-100/50 rounded-xl overflow-x-auto no-scrollbar">
+                                        <span class="text-[8px] uppercase tracking-wider font-extrabold text-slate-400 mb-3 block">Fixed Assembly Flow Line</span>
+                                        <div class="flex items-center space-x-3 min-w-max py-1">
+                                `;
+
+                                lineStations.forEach((st, index) => {
+                                    const mach = appState.machines.find(m => m.id === st.assignedMachineId);
+                                    const machTag = mach ? mach.assetTag : 'None';
+                                    const isMaint = mach && mach.status === 'Maintenance';
+                                    
+                                    // Live telemetry check
+                                    const lastActiveLog = appState.productionLogs.some(log => log.stationCode === st.code && (Date.now() - new Date(log.timestamp).getTime()) < 900000);
+                                    const pulseStyle = lastActiveLog ? 'border-emerald-500 bg-emerald-50/50 shadow-sm' : 'border-slate-200 bg-slate-50';
+
+                                    groupHtml += `
+                                        <div class="relative flex flex-col items-center justify-center p-2 rounded-xl border w-20 text-center transition ${pulseStyle}">
+                                            ${lastActiveLog ? '<span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white animate-pulse"></span>' : ''}
+                                            ${isMaint ? '<span class="absolute -top-1 -left-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>' : ''}
+                                            <span class="text-[9px] font-black text-slate-900">${st.code}</span>
+                                            <span class="text-[8px] text-slate-400 mt-0.5 font-bold truncate w-full">${machTag}</span>
+                                            <span class="text-[7px] text-slate-500 bg-white border px-1 rounded mt-1 font-semibold">${st.tabletStrategy}</span>
+                                        </div>
+                                    `;
+
+                                    if (index < lineStations.length - 1) {
+                                        groupHtml += `
+                                            <div class="text-slate-300">
+                                                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                                            </div>
+                                        `;
+                                    }
+                                });
+
+                                groupHtml += `
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        }
+
+                        groupHtml += `</div>`;
+                    });
+                }
+
+                groupHtml += `</div>`;
+                groupDiv.innerHTML = groupHtml;
+                container.appendChild(groupDiv);
             });
             lucide.createIcons();
         }
