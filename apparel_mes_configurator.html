@@ -303,6 +303,207 @@
                 </div>
             </section>
 
+            <!-- TAB CONTAINER: TABLET OPERATOR SIMULATOR -->
+            <section id="view-simulator" class="tab-view hidden space-y-6">
+                <div class="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-2xl max-w-4xl mx-auto flex flex-col lg:flex-row gap-6 relative overflow-hidden">
+                    <!-- Decorative Device Camera notch to simulate actual hardware tablet -->
+                    <div class="absolute top-2 left-1/2 transform -translate-x-1/2 w-32 h-4 bg-slate-950 rounded-b-xl z-50 flex items-center justify-center space-x-1">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-800"></span>
+                    </div>
+
+                    <!-- Left: Simulator Controls Configuration Panel -->
+                    <div class="w-full lg:w-72 bg-slate-950/80 p-5 rounded-2xl border border-slate-800 text-slate-300 space-y-5">
+                        <div class="border-b border-slate-800 pb-3">
+                            <h3 class="text-xs uppercase font-extrabold text-slate-500 tracking-wider">Device Settings Dashboard</h3>
+                            <p class="text-[11px] text-slate-400">Bind dynamic settings to mock terminal behaviors</p>
+                        </div>
+
+                        <!-- Step 1: Select Workstation -->
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-400 block">1. Select Target Station</label>
+                            <select id="sim-station-select" onchange="loadSimStationInfo()" class="w-full bg-slate-900 border border-slate-800 rounded-lg text-xs py-2 px-3 text-white focus:outline-none focus:border-brand-500">
+                                <!-- Dynamically loaded from registered workstations -->
+                            </select>
+                        </div>
+
+                        <!-- Info Area for selected Station & Layout strategy -->
+                        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80 space-y-3 text-xs" id="sim-station-info">
+                            <div>
+                                <span class="text-slate-500 block uppercase text-[9px] font-bold tracking-wider">Assigned Machinery</span>
+                                <span class="font-bold text-white text-xs" id="sim-info-machine">-</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-500 block uppercase text-[9px] font-bold tracking-wider">Station Setup Strategy</span>
+                                <span class="font-bold text-white text-xs inline-flex items-center" id="sim-info-strategy">
+                                    <span class="inline-block w-2 h-2 rounded-full mr-1.5 bg-sky-500"></span> Traditional Line
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Floating/Shared Tablet Login Simulator -->
+                        <div class="space-y-3 pt-3 border-t border-slate-800/60">
+                            <label class="text-xs font-bold text-slate-400 block">2. Simulator Operations Mode</label>
+                            
+                            <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-2">
+                                <p class="leading-relaxed">Simulate automated check-in and scan badges. In modular strategies, operators roam and dynamically select their current active workbench.</p>
+                                
+                                <button onclick="simulateOperatorBadgeTap()" class="w-full py-1.5 bg-slate-800 hover:bg-slate-750 text-white font-bold rounded-md flex items-center justify-center space-x-1.5 transition">
+                                    <i data-lucide="scan" class="w-3.5 h-3.5"></i>
+                                    <span>Simulate RFID Badging</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Actual Simulated Tablet Screen Content -->
+                    <div class="flex-1 bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden flex flex-col relative h-[520px]">
+                        
+                        <!-- SIM STATE: LOGGED OUT -->
+                        <div id="sim-state-logged-out" class="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-6">
+                            <div class="relative">
+                                <div class="absolute -inset-1 rounded-full bg-gradient-to-r from-cyan-500 to-sky-500 blur opacity-45 animate-pulse"></div>
+                                <div class="relative bg-slate-900 p-6 rounded-full border border-slate-800">
+                                    <i data-lucide="tablet" class="w-12 h-12 text-cyan-400"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white">ApparelThread Operational Terminal</h3>
+                                <p class="text-xs text-slate-400 max-w-sm mt-1 mx-auto leading-relaxed">Secure manual entry point. Please tap your operator RFID badge or utilize biometric authentication to initiate tracking sequence.</p>
+                            </div>
+                            
+                            <!-- Dummy badge quick log in buttons for operator simulation -->
+                            <div class="grid grid-cols-2 gap-3 w-full max-w-sm">
+                                <button onclick="loginAsOperator('John Doe', 'OP-0482')" class="bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:border-slate-700 text-white p-3 rounded-xl text-left flex items-center space-x-3 transition">
+                                    <div class="bg-brand-500/10 text-brand-400 p-1.5 rounded-lg"><i data-lucide="user" class="w-4 h-4"></i></div>
+                                    <div>
+                                        <p class="text-xs font-bold">John Doe</p>
+                                        <p class="text-[9px] text-slate-500">ID: OP-0482</p>
+                                    </div>
+                                </button>
+                                <button onclick="loginAsOperator('Maria Santos', 'OP-0599')" class="bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:border-slate-700 text-white p-3 rounded-xl text-left flex items-center space-x-3 transition">
+                                    <div class="bg-indigo-500/10 text-indigo-400 p-1.5 rounded-lg"><i data-lucide="user" class="w-4 h-4"></i></div>
+                                    <div>
+                                        <p class="text-xs font-bold">Maria Santos</p>
+                                        <p class="text-[9px] text-slate-500">ID: OP-0599</p>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- SIM STATE: OPERATOR LOGGED IN / ACTIVE CONTROLS -->
+                        <div id="sim-state-active" class="hidden flex-1 flex flex-col text-white">
+                            <!-- Operator info top-bar in Simulated tablet layout -->
+                            <div class="bg-slate-900/90 px-6 py-4 border-b border-slate-800 flex justify-between items-center z-10">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center font-bold text-xs" id="sim-avatar">
+                                        JD
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-bold" id="sim-operator-name">John Doe</h4>
+                                        <p class="text-[10px] text-slate-400" id="sim-operator-id">ID: OP-0482</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="text-right">
+                                        <span class="text-slate-500 block text-[9px] uppercase font-bold tracking-wider">Workstation Location</span>
+                                        <span class="font-bold text-xs text-sky-400" id="sim-display-station">Line 01 - Station 01</span>
+                                    </div>
+                                    <button onclick="logoutOperator()" class="text-red-400 hover:text-red-300 p-1.5 hover:bg-slate-800/80 rounded-lg transition" title="Log Out">
+                                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Live Panel split -->
+                            <div class="flex-1 grid grid-cols-1 md:grid-cols-5 overflow-hidden">
+                                
+                                <!-- Left side: Visual Operation parts selector -->
+                                <div class="md:col-span-2 border-r border-slate-800 p-4 flex flex-col space-y-3 bg-slate-950">
+                                    <span class="text-slate-500 text-[10px] uppercase font-bold tracking-wider">Garment Assembly Part</span>
+                                    <div class="grid grid-cols-2 gap-2 flex-1">
+                                        <!-- Operation select buttons with simple visual SVGs -->
+                                        <button onclick="selectSimOperation('Collar Stitch', 'collar')" class="sim-op-btn active flex flex-col items-center justify-center border rounded-xl p-2.5 hover:bg-slate-900 transition-all">
+                                            <svg class="w-10 h-10 mb-1" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <path d="M4 12c4 2 12 10 20 10s16-8 20-10L36 36H12L4 12z" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                            <span class="text-[10px] font-bold text-center">Collar Stitch</span>
+                                        </button>
+                                        <button onclick="selectSimOperation('Attach Sleeve', 'sleeve')" class="sim-op-btn flex flex-col items-center justify-center border border-slate-800 rounded-xl p-2.5 hover:bg-slate-900 transition-all">
+                                            <svg class="w-10 h-10 mb-1" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <path d="M10 8l14 6 14-6v12l-14 4-14-4V8z" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M24 20v20" stroke-linecap="round"/>
+                                            </svg>
+                                            <span class="text-[10px] font-bold text-center">Attach Sleeve</span>
+                                        </button>
+                                        <button onclick="selectSimOperation('Hem Waist', 'hem')" class="sim-op-btn flex flex-col items-center justify-center border border-slate-800 rounded-xl p-2.5 hover:bg-slate-900 transition-all">
+                                            <svg class="w-10 h-10 mb-1" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <rect x="8" y="10" width="32" height="28" rx="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M8 32h32" stroke-linecap="round"/>
+                                            </svg>
+                                            <span class="text-[10px] font-bold text-center">Hem Waist</span>
+                                        </button>
+                                        <button onclick="selectSimOperation('Pocket Join', 'pocket')" class="sim-op-btn flex flex-col items-center justify-center border border-slate-800 rounded-xl p-2.5 hover:bg-slate-900 transition-all">
+                                            <svg class="w-10 h-10 mb-1" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <path d="M12 12h24v16a12 12 0 01-24 0V12z" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M12 20h24" stroke-linecap="round"/>
+                                            </svg>
+                                            <span class="text-[10px] font-bold text-center">Pocket Join</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Right side: Touch Action Targets and Real-time Counter feedback -->
+                                <div class="md:col-span-3 p-5 flex flex-col justify-between space-y-4">
+                                    
+                                    <!-- Targets feedback widget -->
+                                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+                                        <div class="space-y-1">
+                                            <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Hourly Production Target</span>
+                                            <div class="flex items-baseline space-x-1">
+                                                <span class="text-2xl font-black text-emerald-400" id="sim-display-good">0</span>
+                                                <span class="text-xs text-slate-500 font-bold">/</span>
+                                                <span class="text-xs text-slate-500 font-bold" id="sim-display-target">30 PIECES</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Efficiency indicator gauge (Dynamic circular border or percentage status) -->
+                                        <div class="relative flex items-center justify-center">
+                                            <div class="w-14 h-14 rounded-full border-4 border-slate-800 flex items-center justify-center" id="sim-eff-circle-border">
+                                                <span class="text-xs font-black text-white" id="sim-display-efficiency">0%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Touch targets interactive action -->
+                                    <div class="grid grid-cols-5 gap-3 flex-1 min-h-[160px]">
+                                        <!-- Major tap target: Good Piece (+1) -->
+                                        <button onclick="logSimulationPiece('good')" class="col-span-3 bg-gradient-to-br from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 active:scale-95 text-white rounded-2xl flex flex-col items-center justify-center shadow-xl shadow-emerald-950/20 transition-transform">
+                                            <span class="bg-white/10 p-3 rounded-full mb-2"><i data-lucide="plus-circle" class="w-8 h-8"></i></span>
+                                            <span class="text-base font-extrabold tracking-wide">GOOD PIECE</span>
+                                            <span class="text-[10px] opacity-75 font-bold uppercase mt-0.5">Register +1 Unit</span>
+                                        </button>
+
+                                        <!-- Minor tap target: Defect / Rework -->
+                                        <button onclick="logSimulationPiece('defect')" class="col-span-2 bg-gradient-to-br from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 active:scale-95 text-white rounded-2xl flex flex-col items-center justify-center shadow-xl shadow-red-950/20 transition-transform">
+                                            <span class="bg-white/10 p-2.5 rounded-full mb-2"><i data-lucide="alert-triangle" class="w-6 h-6"></i></span>
+                                            <span class="text-xs font-black tracking-wide">REWORK</span>
+                                            <span class="text-[9px] opacity-75 font-bold uppercase mt-0.5">Defect Counter: <span id="sim-display-defects" class="font-extrabold">0</span></span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Quick simulated notifications or state alerts inside operator panel -->
+                                    <div class="bg-slate-900/50 p-2.5 rounded-lg border border-slate-800/80 text-[10px] text-slate-500 flex items-center justify-between">
+                                        <span class="font-semibold flex items-center"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500 mr-1"></i> Continuous Cloud Sync</span>
+                                        <span class="text-slate-400 font-bold" id="sim-active-operation">Operation: Collar Stitch</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- TAB CONTAINER: LINE GROUPS -->
             <section id="view-groups" class="tab-view hidden space-y-6">
                 <div class="flex justify-between items-center">
@@ -1063,7 +1264,13 @@
             document.querySelectorAll('.tab-view').forEach(view => {
                 view.classList.add('hidden');
             });
-            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            
+            const activeView = document.getElementById(`view-${tabId}`);
+            if (activeView) {
+                activeView.classList.remove('hidden');
+            } else {
+                console.warn(`View view-${tabId} not found in DOM.`);
+            }
 
             // Render specific components related to loaded Tab viewports
             renderAllViews();
@@ -1971,6 +2178,7 @@
             renderAllViews();
         }
 
+        // Deletes standard setting parameters safely
         function deleteRecord(type, id) {
             const isConfirmed = confirm(`Are you sure you want to permanently remove this ${type} parameter setting?`);
             if (!isConfirmed) return;
